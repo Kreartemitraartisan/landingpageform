@@ -199,7 +199,7 @@
     <script>
         // ===== KONFIGURASI =====
         // Ganti dengan webhook URL n8n kamu
-        const N8N_WEBHOOK_URL = 'https://kreartemitraartisan.app.n8n.cloud/webhook/check-form';';
+        const N8N_WEBHOOK_URL = 'https://kreartemitraartisan.app.n8n.cloud/webhook/check-form';
         
         // Ganti dengan Tally Form ID kamu
         const TALLY_FORM_ID = 'Xx060P';
@@ -268,7 +268,7 @@
             }
 
             try {
-                const response = await fetch(`${const N8N_WEBHOOK_URL = 'https://kreartemitraartisan.app.n8n.cloud/webhook/check-form';}?invoice_no=${encodeURIComponent(invoiceNo)}`);
+                const response = await fetch(`${N8N_WEBHOOK_URL}?invoice_no=${encodeURIComponent(invoiceNo)}`);
                 const data = await response.json();
 
                 switch (data.status) {
