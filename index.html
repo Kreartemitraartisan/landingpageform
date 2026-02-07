@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krearte Customer Survey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        h1 {
+            color: #1a1a2e;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* Status Messages */
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .status-icon.success {
+            background: #d4edda;
+            color: #28a745;
+        }
+
+        .status-icon.error {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+
+        .status-icon.warning {
+            background: #fff3cd;
+            color: #ffc107;
+        }
+
+        .status-message {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .status-detail {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 24px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Redirect countdown */
+        .countdown {
+            margin-top: 16px;
+            color: #888;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎨</div>
+        <h1>Krearte Customer Survey</h1>
+        <p class="subtitle">Terima kasih telah menjadi pelanggan kami</p>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p class="loading-text">Memverifikasi link survey...</p>
+        </div>
+
+        <!-- Success - Redirect to Survey -->
+        <div id="status-pending" class="hidden">
+            <div class="status-icon success">✓</div>
+            <p class="status-message">Link Valid!</p>
+            <p class="status-detail">Anda akan diarahkan ke halaman survey...</p>
+            <p class="countdown">Mengalihkan dalam <span id="countdown">3</span> detik</p>
+        </div>
+
+        <!-- Already Completed -->
+        <div id="status-completed" class="hidden">
+            <div class="status-icon warning">✓</div>
+            <p class="status-message">Survey Sudah Diisi</p>
+            <p class="status-detail">Anda sudah pernah mengisi survey untuk pesanan ini.<br>Terima kasih atas feedback Anda! 🙏</p>
+        </div>
+
+        <!-- Invalid Link -->
+        <div id="status-invalid" class="hidden">
+            <div class="status-icon error">✕</div>
+            <p class="status-message">Link Tidak Valid</p>
+            <p class="status-detail">Maaf, link survey ini tidak valid atau sudah kadaluarsa.<br>Silakan hubungi tim Krearte jika ada pertanyaan.</p>
+            <a href="https://wa.me/6281234567890" class="btn">Hubungi Kami</a>
+        </div>
+
+        <!-- Error -->
+        <div id="status-error" class="hidden">
+            <div class="status-icon error">!</div>
+            <p class="status-message">Terjadi Kesalahan</p>
+            <p class="status-detail">Maaf, terjadi kesalahan saat memverifikasi link.<br>Silakan coba lagi dalam beberapa saat.</p>
+            <a href="#" onclick="location.reload()" class="btn">Coba Lagi</a>
+        </div>
+    </div>
+
+    <script>
+        // ===== KONFIGURASI =====
+        // Ganti dengan webhook URL n8n kamu
+        const N8N_WEBHOOK_URL = 'https://YOUR-N8N-URL/webhook/check-survey';
+        
+        // Ganti dengan Tally Form ID kamu
+        const TALLY_FORM_ID = 'Xx060P';
+        // =======================
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const invoiceNo = urlParams.get('invoice_no');
+        const customerName = urlParams.get('customer_name');
+        const csName = urlParams.get('cs_name');
+        const referralCode = urlParams.get('referral_code');
+
+        // DOM Elements
+        const loadingEl = document.getElementById('loading');
+        const pendingEl = document.getElementById('status-pending');
+        const completedEl = document.getElementById('status-completed');
+        const invalidEl = document.getElementById('status-invalid');
+        const errorEl = document.getElementById('status-error');
+        const countdownEl = document.getElementById('countdown');
+
+        // Hide all status elements
+        function hideAll() {
+            loadingEl.classList.add('hidden');
+            pendingEl.classList.add('hidden');
+            completedEl.classList.add('hidden');
+            invalidEl.classList.add('hidden');
+            errorEl.classList.add('hidden');
+        }
+
+        // Show specific status
+        function showStatus(status) {
+            hideAll();
+            document.getElementById(`status-${status}`).classList.remove('hidden');
+        }
+
+        // Redirect to Tally with countdown
+        function redirectToTally(data) {
+            showStatus('pending');
+            
+            let seconds = 3;
+            const interval = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    
+                    // Build Tally URL with prefilled data
+                    const tallyUrl = new URL(`https://tally.so/r/${TALLY_FORM_ID}`);
+                    tallyUrl.searchParams.set('customer_name', data.customer_name || customerName || '');
+                    tallyUrl.searchParams.set('invoice_no', data.invoice_no || invoiceNo || '');
+                    tallyUrl.searchParams.set('cs_name', data.cs_name || csName || '');
+                    tallyUrl.searchParams.set('referral_code', data.referral_code || referralCode || '');
+                    
+                    window.location.href = tallyUrl.toString();
+                }
+            }, 1000);
+        }
+
+        // Check survey status
+        async function checkSurveyStatus() {
+            // Validate required parameter
+            if (!invoiceNo) {
+                showStatus('invalid');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${N8N_WEBHOOK_URL}?invoice_no=${encodeURIComponent(invoiceNo)}`);
+                const data = await response.json();
+
+                switch (data.status) {
+                    case 'pending':
+                        redirectToTally(data);
+                        break;
+                    case 'completed':
+                        showStatus('completed');
+                        break;
+                    case 'invalid':
+                        showStatus('invalid');
+                        break;
+                    default:
+                        showStatus('error');
+                }
+            } catch (error) {
+                console.error('Error checking survey status:', error);
+                showStatus('error');
+            }
+        }
+
+        // Start checking when page loads
+        checkSurveyStatus();
+    </script>
+</body>
+</html>
